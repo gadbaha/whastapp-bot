@@ -4,7 +4,7 @@
 
 module.exports = {
     // Bot Owner Configuration
-    ownerNumber: ["254712345678"], // Replace with your number without + or spaces
+    ownerNumber: ["254791085514"], // Replace with your number without + or spaces
     ownerName: ["Bahati Tech Productions"], // Your Name
     
     // Bot Configuration
@@ -17,6 +17,7 @@ module.exports = {
     stickerLimit: 10, // Free stickers per day
     sessionName: "session",
     sessionID: process.env.SESSION_ID || "",
+    usePairingCode: true, // Set to true to use pairing code instead of QR code
     newsletterJid: "", // Optional: for menu forwarding
     updateZipUrl: "", // Optional: for bot updates
     menuImage: "./assets/bahati_logo.png", // Path to the menu image

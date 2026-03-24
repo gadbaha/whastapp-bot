@@ -59,7 +59,8 @@ const {
   useMultiFileAuthState,
   DisconnectReason,
   Browsers,
-  fetchLatestBaileysVersion
+  fetchLatestBaileysVersion,
+  usePairingCode
 } = require('@whiskeysockets/baileys');
 const qrcode = require('qrcode-terminal');
 const config = require('./config');
@@ -230,7 +231,7 @@ async function startBot() {
   const sock = makeWASocket({
     version, // explicit WA Web version negotiated with the server
     logger: suppressedLogger,
-    printQRInTerminal: false,
+    printQRInTerminal: false, // Always false, we'll handle QR or pairing code
     // Use a common desktop browser signature
     browser: ['Chrome', 'Windows', '10.0'],
     auth: state,
@@ -238,8 +239,22 @@ async function startBot() {
     syncFullHistory: false,
     downloadHistory: false,
     markOnlineOnConnect: false,
-    getMessage: async () => undefined // Don't load messages from store
+    getMessage: async () => undefined, // Don't load messages from store
+    // Add pairing code option
+    usePairingCode: config.usePairingCode,
   });
+
+  // Handle pairing code if enabled
+  if (config.usePairingCode && !sock.authState.creds.registered) {
+    const phoneNumber = await extra.ask("Please enter your WhatsApp phone number (e.g., 254712345678): ");
+    const code = await sock.requestPairingCode(phoneNumber);
+    console.log(`
+
+📱 Your Pairing Code: ${code}
+
+`);
+    console.log("Open WhatsApp on your phone, go to Linked Devices, then Link with phone number, and enter the code above.");
+  }
 
   // Bind store to socket
   store.bind(sock.ev);
@@ -277,7 +292,7 @@ async function startBot() {
   sock.ev.on('connection.update', async (update) => {
     const { connection, lastDisconnect, qr } = update;
 
-    if (qr) {
+    if (qr && !config.usePairingCode) {
       console.log('\n\n📱 Scan this QR code with WhatsApp:\n');
       qrcode.generate(qr, { small: true });
     }
@@ -330,18 +345,20 @@ async function startBot() {
     await handler.handleGroupParticipantsUpdate(sock, update);
   });
 
-  // Handle messages.delete (for antidelete)
-  sock.ev.on('messages.delete', async (update) => {
-    await handler.handleMessageDelete(sock, update, store);
-  });
-
-  // Handle calls (for anticall)
-  sock.ev.on('call', async (calls) => {
-    await handler.handleCall(sock, calls);
-  });
-
   return sock;
 }
 
 // Start the bot
 startBot();
+
+// Simple HTTP server for Render health check
+const http = require('http');
+const server = http.createServer((req, res) => {
+  res.writeHead(200, { 'Content-Type': 'text/plain' });
+  res.end('BAHATI BOT is running!\n');
+});
+
+const PORT = process.env.PORT || 8080;
+server.listen(PORT, () => {
+  console.log(`HTTP server listening on port ${PORT}`);
+});
