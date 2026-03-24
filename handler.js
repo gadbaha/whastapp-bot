@@ -370,11 +370,11 @@ const handleMessage = async (sock, msg, store) => {
   const args = body.slice(config.prefix.length).trim().split(/ +/).slice(1);
   const commandName = body.slice(config.prefix.length).trim().split(/ +/).shift().toLowerCase();
 
-    const command = commands.get(commandName);
+  const command = commands.get(commandName);
 
-    const userId = msg.key.participant || sender; // Use participant JID for group messages, sender for DMs
-    const isPremiumUser = database.isPremium(userId);
-    const userUsage = database.getUserUsage(userId);
+  const userId = msg.key.participant || sender; // Use participant JID for group messages, sender for DMs
+  const isPremiumUser = database.isPremium(userId);
+  const userUsage = database.getUserUsage(userId);
 
   const extra = {
     // Helper to reply to the message
@@ -429,6 +429,11 @@ const handleMessage = async (sock, msg, store) => {
       const urlRegex = /(https?:\/\/[^\s]+)/g;
       return text.match(urlRegex) || [];
     },
+    // Helper to get buffer from URL
+    getBuffer: async (url) => {
+      const response = await axios.get(url, { responseType: 'arraybuffer' });
+      return Buffer.from(response.data);
+    },
     // Helper to kick a participant
     kickParticipant: async (groupId, participantId) => {
       await sock.groupParticipantsUpdate(groupId, [participantId], 'remove');
@@ -449,6 +454,8 @@ const handleMessage = async (sock, msg, store) => {
     clearWarnings: (groupId, userId) => {
       return database.clearWarnings(groupId, userId);
     },
+    // Helper to check if user is premium
+    isPremium: database.isPremium(userId),
     // Helper to check if user is owner
     isOwner: isOwner(msg.key.participant || sender),
     // Helper to check if user is admin

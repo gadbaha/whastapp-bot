@@ -33,7 +33,7 @@ module.exports = {
 
         replyMessage += `🤖 AI Questions: ${aiRemaining}/${config.aiLimit} remaining\n`;
         replyMessage += `🖼️ Stickers: ${stickerRemaining}/${config.stickerLimit} remaining\n\n`;
-        replyMessage += `Upgrade to Premium for unlimited access! Contact ${config.premiumPaymentNumber} for details.\n`;
+        replyMessage += `Upgrade to Premium for unlimited access!\n\n${config.premiumPaymentInstructions}\n`;
       }
 
       replyMessage += `\n${config.footerText}`;

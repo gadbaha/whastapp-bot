@@ -13,6 +13,7 @@ module.exports = {
     premiumNumbers: ["254791085514", "254759261788"], // Numbers with premium access
     premiumPaymentNumber: "254791085514", // M-Pesa number for premium payments
     aiLimit: 5, // Free AI questions per day
+    premiumPaymentInstructions: "To get premium access, send KES 100 to M-Pesa number 0791085514. Then send a screenshot of the M-Pesa confirmation message to the bot owner for verification. Once verified, your premium access will be activated for one month.",
     stickerLimit: 10, // Free stickers per day
     sessionName: "session",
     sessionID: process.env.SESSION_ID || "",
@@ -22,7 +23,7 @@ module.exports = {
     footerText: "Powered by Bahati Tech Productions", // Footer text for messages
     
     // Sticker Configuration
-    packname: "BAHATI MD Stickers",
+    packname: "BAHATI BOT Stickers",
     
     // Bot Behavior
     selfMode: false, // Private mode - only owner can use commands
@@ -60,7 +61,8 @@ module.exports = {
     
     // API Keys (add your own)
     apiKeys: {
-      openai: "",
+      openai: process.env.OPENAI_API_KEY || "",
+      openWeather: process.env.OPENWEATHER_API_KEY || "", // Get from https://openweathermap.org/api
       deepai: "",
       remove_bg: ""
     },
