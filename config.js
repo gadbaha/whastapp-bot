@@ -37,14 +37,15 @@ module.exports = {
     
     // Group Settings Defaults
     defaultGroupSettings: {
+      // Removed antidelete and anticall for ban prevention
       antilink: false,
-      antilinkAction: "delete", // "delete", "kick", "warn"
+      antilinkAction: "warn", // "delete", "kick", "warn" - Changed to 'warn' for safer default
       antitag: false,
       antitagAction: "delete",
       antiall: false, // Owner only - blocks all messages from non-admins
       antiviewonce: false,
       antibot: false,
-      anticall: false, // Anti-call feature
+
       antigroupmention: false, // Anti-group mention feature
       antigroupmentionAction: "delete", // "delete", "kick"
       welcome: false,
@@ -52,7 +53,7 @@ module.exports = {
       goodbye: false,
       goodbyeMessage: "Goodbye @user 👋",
       antiSpam: false,
-      antidelete: false,
+
       nsfw: false,
       detect: false,
       chatbot: false,

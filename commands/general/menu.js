@@ -25,6 +25,8 @@ module.exports = {
 
       // Group commands by category
       for (const command of allCommands.values()) {
+        // Filter out commands that are no longer available or are high-risk
+        if (["broadcast"].includes(command.name)) continue;
         if (!categories.has(command.category)) {
           categories.set(command.category, []);
         }
@@ -39,6 +41,8 @@ module.exports = {
       for (const [category, cmds] of categories.entries()) {
         menuText += `*───「 ${category.toUpperCase()} 」───*\n`;
         for (const cmd of cmds) {
+          // Only display commands that are not ownerOnly unless the sender is the owner
+          if (cmd.ownerOnly && !extra.isOwner) continue;
           menuText += `*${config.prefix}${cmd.name}* - ${cmd.description}\n`;
         }
         menuText += `\n`;

@@ -23,8 +23,15 @@ const getBuffer = async (url, options) => {
   }
 };
 
+/**
+ * Sleep function for delays
+ * @param {number} ms - milliseconds to sleep
+ */
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
 module.exports = {
   formatTime,
   getRandom,
   getBuffer,
+  sleep,
 };

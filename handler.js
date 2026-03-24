@@ -9,6 +9,7 @@ const { jidDecode, jidEncode } = require("@whiskeysockets/baileys");
 const fs = require("fs");
 const path = require("path");
 const axios = require("axios");
+const { sleep } = require("./utils/helpers");
 
 // Group metadata cache to prevent rate limiting
 const groupMetadataCache = new Map();
@@ -379,10 +380,12 @@ const handleMessage = async (sock, msg, store) => {
   const extra = {
     // Helper to reply to the message
     reply: async (text, options = {}) => {
+      await sleep(1000); // Introduce a 1-second delay before replying
       await sock.sendMessage(sender, { text: text, ...options }, { quoted: msg });
     },
     // Helper to send a message to a specific JID
     send: async (jid, content, options = {}) => {
+      await sleep(1000); // Introduce a 1-second delay before sending messages
       await sock.sendMessage(jid, content, options);
     },
     // Helper to get message type
@@ -619,40 +622,7 @@ const handleGroupParticipantsUpdate = async (sock, update) => {
   }
 };
 
-const handleMessageDelete = async (sock, update, store) => {
-  const groupId = update.chat;
-  const messageKey = update.key;
-
-  const groupSettings = database.getGroupSettings(groupId);
-
-  if (groupSettings.antidelete) {
-    const deletedMessage = await store.loadMessage(groupId, messageKey.id);
-    if (deletedMessage) {
-      await sock.sendMessage(groupId, {
-        text: `*Antidelete Activated!*\n\nSomeone tried to delete a message:\n\nSender: @${deletedMessage.key.participant.split("@")[0]}\nMessage: ${deletedMessage.message.conversation || deletedMessage.message.extendedTextMessage?.text || "(Non-text message)"}`,
-        mentions: [deletedMessage.key.participant],
-      });
-    }
-  }
-};
-
-const handleCall = async (sock, calls) => {
-  for (const call of calls) {
-    if (call.status === "offer") {
-      const userId = call.from;
-      const userSettings = database.getUser(userId);
-
-      if (userSettings.anticall) {
-        await sock.sendMessage(userId, { text: "I'm sorry, I cannot receive calls." });
-        await sock.updateBlockStatus(userId, "block");
-      }
-    }
-  }
-};
-
 module.exports = {
   handleMessage,
   handleGroupParticipantsUpdate,
-  handleMessageDelete,
-  handleCall,
 };
