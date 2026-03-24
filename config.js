@@ -8,8 +8,12 @@ module.exports = {
     ownerName: ["Bahati Tech Productions"], // Your Name
     
     // Bot Configuration
-    botName: "BAHATI MD",
+    botName: "BAHATI BOT",
     prefix: ".", // Default prefix for commands
+    premiumNumbers: ["254791085514", "254759261788"], // Numbers with premium access
+    premiumPaymentNumber: "254791085514", // M-Pesa number for premium payments
+    aiLimit: 5, // Free AI questions per day
+    stickerLimit: 10, // Free stickers per day
     sessionName: "session",
     sessionID: process.env.SESSION_ID || "",
     newsletterJid: "", // Optional: for menu forwarding

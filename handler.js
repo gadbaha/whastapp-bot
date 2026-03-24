@@ -370,7 +370,11 @@ const handleMessage = async (sock, msg, store) => {
   const args = body.slice(config.prefix.length).trim().split(/ +/).slice(1);
   const commandName = body.slice(config.prefix.length).trim().split(/ +/).shift().toLowerCase();
 
-  const command = commands.get(commandName);
+    const command = commands.get(commandName);
+
+    const userId = msg.key.participant || sender; // Use participant JID for group messages, sender for DMs
+    const isPremiumUser = database.isPremium(userId);
+    const userUsage = database.getUserUsage(userId);
 
   const extra = {
     // Helper to reply to the message
@@ -499,6 +503,9 @@ const handleMessage = async (sock, msg, store) => {
     args: args,
     // The command name
     commandName: commandName,
+    // Premium status and usage
+    isPremiumUser: isPremiumUser,
+    userUsage: userUsage,
   };
 
   // Record message for group stats (if implemented)
@@ -540,7 +547,27 @@ const handleMessage = async (sock, msg, store) => {
     }
 
     try {
+      // Premium and usage checks
+      if (!isPremiumUser) {
+        if (commandName === "ai" && userUsage.ai >= config.aiLimit) {
+          return extra.reply(`You have reached your daily AI question limit (${config.aiLimit}). Upgrade to Premium for unlimited access! Contact ${config.premiumPaymentNumber} for details.`);
+        }
+        if (commandName === "sticker" && userUsage.sticker >= config.stickerLimit) {
+          return extra.reply(`You have reached your daily sticker creation limit (${config.stickerLimit}). Upgrade to Premium for unlimited access! Contact ${config.premiumPaymentNumber} for details.`);
+        }
+      }
+
       await command.execute(sock, msg, args, extra);
+
+      // Increment usage for non-premium users
+      if (!isPremiumUser) {
+        if (commandName === "ai") {
+          database.incrementUsage(userId, "ai");
+        }
+        if (commandName === "sticker") {
+          database.incrementUsage(userId, "sticker");
+        }
+      }
     } catch (error) {
       console.error("Error executing command:", error);
       await extra.reply(config.messages.error);
