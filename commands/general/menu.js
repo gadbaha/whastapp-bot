@@ -4,6 +4,8 @@
 
 const config = require("../../config");
 const { loadCommands } = require("../../utils/commandLoader");
+const fs = require("fs");
+const path = require("path");
 
 module.exports = {
   name: "menu",
@@ -45,9 +47,31 @@ module.exports = {
       menuText += `_Total Commands: ${allCommands.size}_\n\n`;
       menuText += `*Usage: ${config.prefix}command <args>*\n`;
       menuText += `*Example: ${config.prefix}antilink on*\n\n`;
-      menuText += `*Powered by ${config.botName}*`;
+      menuText += config.footerText; // Add the footer text
 
-      await extra.reply(menuText);
+      // Send the menu with the logo if available
+      const logoPath = path.join(__dirname, "..", config.menuImage);
+      if (fs.existsSync(logoPath)) {
+        const logoBuffer = fs.readFileSync(logoPath);
+        await sock.sendMessage(extra.from, {
+          image: logoBuffer,
+          caption: menuText,
+          contextInfo: {
+            mentionedJid: [extra.from],
+            externalAdReply: {
+              title: config.botName,
+              body: config.footerText,
+              thumbnail: logoBuffer,
+              sourceUrl: config.social.github || "https://github.com/yourusername",
+              mediaType: 1,
+              renderLargerThumbnail: true,
+            },
+          },
+        });
+      } else {
+        await extra.reply(menuText);
+      }
+
     } catch (error) {
       console.error("Error generating menu:", error);
       await extra.reply(config.messages.error);
